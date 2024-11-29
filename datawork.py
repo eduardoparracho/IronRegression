@@ -8,6 +8,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, root_mean_squared_error
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LassoCV
 def read_data():
     df = pd.read_csv("king_ country_ houses_aa.csv")
 
@@ -194,21 +196,19 @@ def ridge_treatment(df_ridge):
 
 def lasso_treatment(df_lasso):
   
-  for col in df_lasso.columns:
-    n = len(df_lasso[col].value_counts().unique())
-    print(col, n)
-    if n < 30:
-        df_lasso = df_lasso.drop(col, axis=1)
+  values = [225079036, 1125079111,3303850390, 2524069078, 5061300030	, 8649401270, 1437500015, 5062300280, 7805600070, 8649401000, 1437500035, 8649400410, 8649400790, 2626119028, 2626119062,6762700020	, 1924059029, 7767000060, 1225069038, 624069108,9808700762, 6762700020, 9208900037, 8835800350, 1225069038, 2426039123, 6072800246, 3023069166, 2524069078, 6306400140, 	1972202010, 3180100023, 8673400177, 1702900664, 1346300150, 1972200426, 1972200428,  1020069017, 722069232, 3626079040, 2624089007, 2623069031, 2323089009, 3326079016,  9808700762, 2470100110, 6762700020, 1924059029	, 9208900037, 1225069038, 1773100755, 627300145, 5566100170, 2402100895,  8812401450,   ]
   
-  df_lasso = df_lasso.drop("zipcode", axis=1)
+  df_lasso = df_lasso[df_lasso.id.isin(values) == False]
+  
+  df_lasso = df_lasso.drop("sqft_lot", axis=1)
   df_lasso = df_lasso.drop("long", axis=1)
-  df_lasso = df_lasso.drop("sqft_above", axis=1)
-  df_lasso = df_lasso.drop("sqft_living15", axis=1)
+  df_lasso = df_lasso.drop("zipcode", axis=1)
+  df_lasso = df_lasso.drop("yr_built", axis=1)
+  df_lasso = df_lasso.drop("yr_renovated", axis=1)
+  df_lasso = df_lasso.drop("condition", axis=1)
   df_lasso = df_lasso.drop("sqft_lot15", axis=1)
+  df_lasso = df_lasso.drop("id", axis =1)
   
-  for col in df_lasso.columns:
-    df_lasso = remove_outliers(df_lasso, col)
-    
   return df_lasso
 
 
@@ -239,3 +239,37 @@ def get_standardized_X(df):
   return X_norm
 
 
+
+def lasso_pipeline(df_lasso, target_column):
+    # Split data into features (X) and target (y)
+    X = df_lasso.drop(columns=[target_column])
+    y = df_lasso[target_column]
+
+    # Standardize features and apply Lasso with cross-validation
+    lasso_pipeline = Pipeline([
+        ('scaler', StandardScaler()),  # Standardize features
+        ('lasso', LassoCV(cv=5, random_state=42))  # Lasso with cross-validation
+    ])
+
+    # Split data into training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+    # Fit the pipeline
+    lasso_pipeline.fit(X_train, y_train)
+
+    # Make predictions
+    predictions = lasso_pipeline.predict(X_test)
+
+    # Evaluate model
+    r2 = r2_score(y_test, predictions)
+    RMSE = root_mean_squared_error(y_test, predictions)
+    MSE = mean_squared_error(y_test, predictions)
+    MAE = mean_absolute_error(y_test, predictions)
+
+    #Printing the results
+    print("R2 = ", round(r2, 4))
+    print("RMSE = ", round(RMSE, 4))
+    print("MSE =  ", round(MSE, 4))
+    print("MAE = ", round(MAE, 4))
+
+    return lasso_pipeline, r2, RMSE, MSE, MAE

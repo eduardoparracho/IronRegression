@@ -135,11 +135,13 @@ st.subheader("Models Comparison")
 data_comparison = pd.DataFrame(columns=['model', 'R2', 'RMSE', 'MSE', 'MAE'])
 
 
-## Linear Regression
+######### Linear Regression ###################
+
 data_comparison.loc[len(data_comparison)] = best_LR
 
 
-## Decision Tree
+########### Decision Tree #####################
+
 dt = dw.read_data()
 dt = dw.DT_treatment(df)
 
@@ -153,13 +155,14 @@ y_dt = dt['price']
 
 data_comparison.loc[len(data_comparison)] = ['Decision Tree', r2, RMSE, MSE, MAE]
 
-## Ridge Regression
+
+########### Ridge Regression #####################
+
 
 df_ridge = dw.read_data()
 
 df_ridge = dw.LR_treatment(df_ridge)
 
-#Prepare the independenet variable to the target
 X_ridge = df_ridge.drop('price', axis=1) #features
 y_ridge = df_ridge['price'] #target
 
@@ -170,14 +173,15 @@ data_comparison.loc[len(data_comparison)] = ['Ridge Regression', r2, RMSE, MSE, 
 ## lasso Regression
 
 df_lasso = dw.read_data()
+df_lasso = dw.lasso_treatment(df_lasso)
 
-df_lasso = dw.LR_treatment(df_lasso)
+lasso_pipeline, r2, RMSE, MSE, MAE = dw.lasso_pipeline(df_lasso, target_column="price")
 
-X_lasso = df_lasso.drop('price', axis=1) #features
-y_lasso = df_lasso['price'] #target
-
-[r2, RMSE, MSE, MAE, predictions, y_test] = dw.ridge_model(X_lasso, y_lasso)
 data_comparison.loc[len(data_comparison)] = ['Lasso Regression', r2, RMSE, MSE, MAE]
+
+
+
+############ Visualization ################
 
 st.bar_chart(data_comparison, x='model', y=['R2'], color='model')
 st.bar_chart(data_comparison, x='model', y=['RMSE'], color='model')
@@ -186,6 +190,8 @@ st.bar_chart(data_comparison, x='model', y=['MAE'], color='model')
 
 
 st.subheader("> 650K House Price Prediction")
+
+st.text("Given that the Decision Tree model is the one that presented the best results, we will be using it to predict the price of expensive houses.")
 
 houses_df = dw.read_data()
 
