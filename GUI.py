@@ -45,6 +45,7 @@ y = LR_df["price"]
 r2, RMSE, MSE, MAE, predictions, y_test = dw.linear_regression_model(X, y)
 LR_data.loc[len(LR_data)] = ['2', r2, RMSE, MSE, MAE]
 
+best_LR = ["Linear Regression", r2, RMSE, MSE, MAE]
 st.text(f"Remaining columns: {LR_df.columns.to_list()}")
 st.text(f"R2 = {round(r2, 4)}")
 st.text(f"RMSE = {round(RMSE, 4)}")
@@ -127,3 +128,98 @@ st.subheader("Conclusion")
 
 st.text("From what we can gather for the Linear Regression model, the best results are for test 2,3 and 4, where the RMSE, MSE and MAE values are the lowest.")
 st.text("Following tests present worst performance, which might be caused by the removal of too many meaningful features.")
+
+
+st.subheader("Models Comparison")
+
+data_comparison = pd.DataFrame(columns=['model', 'R2', 'RMSE', 'MSE', 'MAE'])
+
+
+## Linear Regression
+data_comparison.loc[len(data_comparison)] = best_LR
+
+
+## Decision Tree
+dt = dw.read_data()
+dt = dw.DT_treatment(df)
+
+for col in dt.columns:
+    dt = dw.remove_outliers(dt, col)
+    
+X_dt = dt.drop('price', axis=1)
+y_dt = dt['price']
+
+[r2, RMSE, MSE, MAE, predictions, y_test] = dw.decision_tree_model(X_dt, y_dt, test_size=0.1)
+
+data_comparison.loc[len(data_comparison)] = ['Decision Tree', r2, RMSE, MSE, MAE]
+
+## Ridge Regression
+
+df_ridge = dw.read_data()
+
+df_ridge = dw.LR_treatment(df_ridge)
+
+#Prepare the independenet variable to the target
+X_ridge = df_ridge.drop('price', axis=1) #features
+y_ridge = df_ridge['price'] #target
+
+[r2, RMSE, MSE, MAE, predictions, y_test] = dw.ridge_model(X_dt, y_dt)
+data_comparison.loc[len(data_comparison)] = ['Ridge Regression', r2, RMSE, MSE, MAE]
+
+
+## lasso Regression
+
+df_lasso = dw.read_data()
+
+df_lasso = dw.LR_treatment(df_lasso)
+
+X_lasso = df_lasso.drop('price', axis=1) #features
+y_lasso = df_lasso['price'] #target
+
+[r2, RMSE, MSE, MAE, predictions, y_test] = dw.ridge_model(X_lasso, y_lasso)
+data_comparison.loc[len(data_comparison)] = ['Lasso Regression', r2, RMSE, MSE, MAE]
+
+st.bar_chart(data_comparison, x='model', y=['R2'], color='model')
+st.bar_chart(data_comparison, x='model', y=['RMSE'], color='model')
+st.bar_chart(data_comparison, x='model', y=['MSE'], color='model')
+st.bar_chart(data_comparison, x='model', y=['MAE'], color='model')
+
+
+st.subheader("> 650K House Price Prediction")
+
+houses_df = dw.read_data()
+
+high_df = houses_df[houses_df.price >= 650000]
+
+low_df = pd.concat( [houses_df[houses_df.price < 650000],high_df.sample(2500, random_state=42)])
+
+high_df = dw.DT_treatment(high_df)
+
+low_df = dw.DT_treatment(low_df)
+
+X_train = low_df.drop('price', axis=1)
+y_train = low_df['price']
+X_test = high_df.drop('price', axis=1)
+y_test = high_df['price']
+
+[r2, RMSE, MSE, MAE, predictions, y_test] = dw.dtmodel_expensive_houses(X_train,X_test,y_train,y_test)
+
+best_DT = pd.DataFrame(columns=['R2', 'RMSE', 'MSE', 'MAE'])
+best_DT = [r2, RMSE, MSE, MAE]
+
+col1, col2 = st.columns(2)
+col3, col4 = st.columns(2)
+
+card1 = col1.container(border=True)
+card2 = col2.container(border=True)
+card3 = col3.container(border=True)
+card4 = col4.container(border=True)
+
+
+card1.metric("R2", round(r2, 4),)
+card2.metric("RMSE", round(RMSE, 4))
+card3.metric("MSE", round(MSE, 4))
+card4.metric("MAE", round(MAE, 4))
+
+print(high_df.price.median())
+
