@@ -101,7 +101,7 @@ st.text(f"MAE = {round(MAE, 4)}")
 
 ####
 
-st.subheader("TEST 6 - Normalized data from test 4")
+st.subheader("TEST 6 - Normalized data from test 5")
 
 X = dw.get_normalized_X(LR_df.drop(['yr_built','sqft_lot'],axis=1))
 y = LR_df["price"]
