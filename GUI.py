@@ -124,7 +124,7 @@ st.line_chart(LR_data, x='test', y=['MSE'])
 st.line_chart(LR_data, x='test', y=['MAE'])
 
 
-st.subheader("Conclusion")
+st.subheader("Outcome:")
 
 st.text("From what we can gather for the Linear Regression model, the best results are for test 2,3 and 4, where the RMSE, MSE and MAE values are the lowest.")
 st.text("Following tests present worst performance, which might be caused by the removal of too many meaningful features.")
@@ -222,10 +222,10 @@ card3 = col3.container(border=True)
 card4 = col4.container(border=True)
 
 
-card1.metric("R2", round(r2, 4),)
-card2.metric("RMSE", round(RMSE, 4))
-card3.metric("MSE", round(MSE, 4))
-card4.metric("MAE", round(MAE, 4))
+card1.metric("R2", round(r2, 3),)
+card2.metric("RMSE", round(RMSE, 1))
+card3.metric("MSE", round(MSE, 1))
+card4.metric("MAE", round(MAE, 1))
 
 print(high_df.price.median())
 
