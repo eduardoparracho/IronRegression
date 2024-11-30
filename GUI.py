@@ -32,7 +32,7 @@ st.text(f"MAE = {round(MAE, 4)}")
 
 ####
 st.subheader("TEST 2 - Data treated by removing unwanted columns and outliers.")
-st.text("Columns with less than 30 unique values were removed.\n Unwanted columns with multiculinearity or unwanted distribution were also removed.")
+st.text("Columns with discrete data were removed.\n Unwanted columns with multiculinearity or unwanted distribution were also removed.")
 
 LR_df = dw.LR_treatment(df)
 
